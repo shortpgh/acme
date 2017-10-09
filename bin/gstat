@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+gitstatid=$(9p read acme/index | grep +gitstat | awk '{ print $1 }')
+if [[ ! -z "$gitstatid" ]]; then
+	echo -n "1,$" | 9p write acme/$gitstatid/addr
+	echo "git add ." | 9p write acme/$gitstatid/data
+	echo "git commit -m 'yourmessagehere'" | 9p write acme/$gitstatid/data
+	echo "git push" | 9p write acme/$gitstatid/data
+	echo "git pull " | 9p write acme/$gitstatid/data
+	echo  "" | 9p write acme/$gitstatid/data
+	echo  "=======" | 9p write acme/$gitstatid/data
+	echo  "" | 9p write acme/$gitstatid/data
+	git status . | 9p write acme/$gitstatid/data
+	echo -n "0,0" | 9p write acme/$gitstatid/addr
+	echo -n "dot=addr" | 9p write acme/$gitstatid/ctl
+	echo -n "show" | 9p write acme/$gitstatid/ctl
+	echo -n "clean" | 9p write acme/$gitstatid/ctl
+else
+	git status . | 9p write acme/new/body
+fi
